@@ -1,0 +1,25 @@
+1. Check LinUCB vs VCLin
+2. Check how regression reduction works. -- Maybe run against eps-greedy with linear.
+   Currently putting importance weights inside the square loss.
+4. Parameter tuning
+
+1. Check classification reduction.
+2. Use warm-starting.
+3. Implement baselines (fully supervised, uniform + greedy, thompson sampling).
+4. Regret plots (synthetic and against fully supervised)
+5. Try bootstrapping to generate a finite policy class and then
+enumerate over them.
+6. How many AMO calls am I making?
+7. Look at average reward over the last n rounds rather than cumulative reward. 
+
+
+DONE:
+Added bernoulli noise in doc-level rewards.
+Offline performance on validation data
+Random forest
+
+NEW TODO:
+DONE 1. Smooth out validation curves
+DONE 2. Get error bars in them
+3. Is best_offline training on noisy data?
+4. Is linUCB validation using confidence interval?
