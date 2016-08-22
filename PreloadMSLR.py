@@ -104,7 +104,7 @@ def preprocess():
         processed[queryid] += 1
         relevances[queryid,docIndex] = relevance
         features[queryid,docIndex,:] = fvec
-    np.savez_compressed(settings.DATA_DIR+'mslr/mslr30k_tv.npz', relevances=relevances,
+    np.savez_compressed(settings.DATA_DIR+'mslr/mslr30k_train.npz', relevances=relevances,
                         features = features, docsPerQuery = docsPerQuery, queryOrder = order)
     print("Datasets:loadTxt [INFO] Loaded"
           " [Min,Max]NumDocs: ", np.min(docsPerQuery), np.max(docsPerQuery), flush = True)
