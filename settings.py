@@ -1,2 +1,2 @@
-BASE_DIR="/Users/akshayk/School/projects/semibandits/code/"
+BASE_DIR=""
 REMOTE_PATH_TO_PYTHON=""
