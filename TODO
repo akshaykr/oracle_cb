@@ -12,6 +12,7 @@ enumerate over them.
 6. How many AMO calls am I making?
 7. Look at average reward over the last n rounds rather than cumulative reward. 
 
+8. Implement all three argmaxes (IW outside square, IW inside square, no IW) and use the best one as the leader.
 
 DONE:
 Added bernoulli noise in doc-level rewards.
