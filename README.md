@@ -48,11 +48,11 @@ Experimentation for oracle based contextual bandit algorithms.
       DATA_DIR=<location of the datasets>
 3. Make sure you have the right .npz files in the DATA_DIR. See ContextIterators.py for the naming. For mslr you want to use the MSLR30k iterator, so you need to have DATA_DIR/mslr/mslr30k_train.npz. For yahoo you want to use the YahooContextIterator object, so you need to have DATA_DIR/yahoo/yahoo_big.npz. Put both mslr30k and yahoo on the cluster
 4. Locally:
-   cd semibandits/code
+   cd <repository location>
    python3 parallel.py | parallel -S 4/<your login>@msrnyc-##.corp.microsoft.com
    Use all of the servers if you can and wait like 4 days.
    If you want to change the parameters, edit the parallel.py file. 
-5. The results will be in semibandits/code/results/mslr_T=36000_L=3_e=0.1/ and semibandits/code/results/yahoo_T=40000_L=2_e=0.5/
+5. The results will be in <repository location>/results/mslr_T=36000_L=3_e=0.1/ and <repository location>/code/results/yahoo_T=40000_L=2_e=0.5/
 
 ******************************
 ** Plotting results
