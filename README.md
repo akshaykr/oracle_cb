@@ -8,12 +8,22 @@ Experimentation for oracle based contextual bandit algorithms.
 1. Clone repository
 2. Instally python3, scipy, numpy, scikit-learn.
 3. Fill in settings.py with your information. I recommend using full paths.
-   BASE_DIR should point to the base of this repository
-   DATA_DIR should point to root/data/ directory
+   BASE_DIR should point to the base of this repository.
+   DATA_DIR should point to root/data/ directory.
    REMOTE_PATH_TO_PYTHON is only used if you want to run things on a cluster. 
+   REMOTE_BASE_DIR is only used if you want to run things on a cluster. 
 3. Download and prepare datasets (MSLR, Yahoo, MQ2007, MQ2008). This is somewhat optional.
-   a. For MSLR: @akshaykr fill me in
+   a. For MSLR: 
+      i. Visit https://www.microsoft.com/en-us/research/project/mslr/
+      ii. Download MSLR-WEB30K dataset
+      iii. unpack it into settings.DATA_DIR/mslr/ you should have 5 files named mslr30k_train<*>.txt where <*> is 1 through 5.
+      iv. python3 PreloadMSLR.py
+          This will produce a file settings.DATADIR/mslr/mslr30k_train.npz which is required for experiments.
    b. For Yahoo: @akshaykr fill me in
+      i. You need to get the dataset, this is somewhat involved. The dataset is C14B here: https://webscope.sandbox.yahoo.com/catalog.php?datatype=c
+      ii. unpack it into settings.DATA_DIR/yahoo/ you should have 6 files named set<1>.<2>.txt where <1> is either 1 or 2 and <2> is train, valid, or test.
+      iii. python3 PreloadYahoo.py
+          This will produce a file settings.DATADIR/yahoo/yahoo_big.npz which is required for experiments.
 
 ******************************
 ** Locally running an algorithm
@@ -29,28 +39,24 @@ Experimentation for oracle based contextual bandit algorithms.
    of the execution.
 
 
-HOW TO RUN AN EXPERIMENT
-1. Clone repository on the cluster.
-2. Set up datasets
-   Create a python file called settings.py with two globals
-   BASE_DIR=<location of code directory>
-   DATA_DIR=<location of the datasets>
-   Make sure you have the right .npz files in the DATA_DIR.
-   See ContextIterators.py for the naming.
-   For mslr you want to use the MSLR30k iterator.
-   So you need to have DATA_DIR/mslr/mslr30k_train.npz
-   For yahoo you want to use the YahooContextIterator object.
-   So you need to have DATA_DIR/yahoo/yahoo_big.npz
-   Put both mslr30k and yahoo on the cluster
-3. Create results directory on the cluster.
-   mkdir semibandits/code/results/
+******************************
+** Running on a cluster
+******************************
+1. Clone repository on the cluster. Locally update REMOTE_PATH_TO_PYTHON and REMOTE_BASE_DIR in settings.py
+2. On the cluster, make sure that the globals in settings.py point to the right places. 
+      BASE_DIR=<location of code directory>
+      DATA_DIR=<location of the datasets>
+3. Make sure you have the right .npz files in the DATA_DIR. See ContextIterators.py for the naming. For mslr you want to use the MSLR30k iterator, so you need to have DATA_DIR/mslr/mslr30k_train.npz. For yahoo you want to use the YahooContextIterator object, so you need to have DATA_DIR/yahoo/yahoo_big.npz. Put both mslr30k and yahoo on the cluster
 4. Locally:
    cd semibandits/code
    python3 parallel.py | parallel -S 4/<your login>@msrnyc-##.corp.microsoft.com
    Use all of the servers if you can and wait like 4 days.
+   If you want to change the parameters, edit the parallel.py file. 
 5. The results will be in semibandits/code/results/mslr_T=36000_L=3_e=0.1/ and semibandits/code/results/yahoo_T=40000_L=2_e=0.5/
 
-HOW TO PLOT RESULTS.
+******************************
+** Plotting results
+******************************
 1. Move the above to results directories locally.
 2. python3 plotting_script.py --save
 
