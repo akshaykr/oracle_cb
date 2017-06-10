@@ -132,5 +132,5 @@ def preprocess(train=True, orders=20):
     return (docsPerQuery, relevances, features)
 
 if __name__=='__main__':
-    # preprocess(train=True, orders=20)
+    preprocess(train=True, orders=20)
     preprocess(train=False, orders=0)
