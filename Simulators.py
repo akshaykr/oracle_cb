@@ -367,7 +367,6 @@ class MSLRBandit(SemibanditSim):
 
 class DatasetBandit(SemibanditSim):
     DATASETS = {
-        'letter': ContextIterators.LetterContextIterator,
         'mq2008': ContextIterators.MQ2008ContextIterator,
         'mq2008val': ContextIterators.MQ2008ValContextIterator,
         'mq2007': ContextIterators.MQ2007ContextIterator,
@@ -379,7 +378,7 @@ class DatasetBandit(SemibanditSim):
         'xor': ContextIterators.XORContextIterator
         }
 
-    def __init__(self, L=5, loop=False, dataset="letter", metric=Metrics.NDCG, structure="none", noise=0.1):
+    def __init__(self, L=5, loop=False, dataset="xor", metric=Metrics.NDCG, structure="none", noise=0.1):
         self.L = L
         self.dataset = dataset
         self.contexts = DatasetBandit.DATASETS[dataset](L=self.L,loop=loop)
