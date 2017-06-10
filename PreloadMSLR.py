@@ -1,14 +1,24 @@
 import settings
 import numpy as np
 
-flist = [settings.DATA_DIR+"mslr/mslr30k_train1.txt",
-         settings.DATA_DIR+"mslr/mslr30k_train2.txt",
-         settings.DATA_DIR+"mslr/mslr30k_train3.txt",
-         settings.DATA_DIR+"mslr/mslr30k_train4.txt",
-         settings.DATA_DIR+"mslr/mslr30k_train5.txt"]
+trainlist = [settings.DATA_DIR+"mslr/mslr30k_train1.txt",
+             settings.DATA_DIR+"mslr/mslr30k_train2.txt",
+             settings.DATA_DIR+"mslr/mslr30k_train3.txt",
+             settings.DATA_DIR+"mslr/mslr30k_train4.txt",
+             settings.DATA_DIR+"mslr/mslr30k_train5.txt"]
 
-def preprocess(orders=20):
+valilist = [settings.DATA_DIR+"mslr/mslr30k_vali1.txt",
+           settings.DATA_DIR+"mslr/mslr30k_vali2.txt",
+           settings.DATA_DIR+"mslr/mslr30k_vali3.txt",
+           settings.DATA_DIR+"mslr/mslr30k_vali4.txt",
+           settings.DATA_DIR+"mslr/mslr30k_vali5.txt"]
+
+def preprocess(train=True, orders=20):
     fidx = 0
+    if train:
+        flist = trainlist
+    else:
+        flist=valilist
     fname = flist[fidx] ## settings.DATA_DIR+"mslr/mslr30k_vali%d.txt" % (fnum)
     queryIds = {}
     queryDocs = {}
@@ -104,8 +114,13 @@ def preprocess(orders=20):
         processed[queryid] += 1
         relevances[queryid,docIndex] = relevance
         features[queryid,docIndex,:] = fvec
-    np.savez_compressed(settings.DATA_DIR+'mslr/mslr30k_train.npz', relevances=relevances,
-                        features = features, docsPerQuery = docsPerQuery, queryOrder = order)
+    if train:
+        np.savez_compressed(settings.DATA_DIR+'mslr/mslr30k_train.npz', relevances=relevances,
+                            features = features, docsPerQuery = docsPerQuery, queryOrder = order)
+    else:
+        np.savez_compressed(settings.DATA_DIR+'mslr/mslr30k_vali.npz', relevances=relevances,
+                            features = features, docsPerQuery = docsPerQuery, queryOrder = order)
+
     print("PreloadMSLR:preprocess [INFO] Loaded"
           " [Min,Max]NumDocs: ", np.min(docsPerQuery), np.max(docsPerQuery), flush = True)
 
@@ -117,4 +132,5 @@ def preprocess(orders=20):
     return (docsPerQuery, relevances, features)
 
 if __name__=='__main__':
-    preprocess()
+    # preprocess(train=True, orders=20)
+    preprocess(train=False, orders=0)

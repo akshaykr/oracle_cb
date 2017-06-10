@@ -49,8 +49,6 @@ class Semibandit(object):
         for t in range(T):
             if t != 0 and np.log2(t+1) == int(np.log2(t+1)) and verbose:
                 print("t = %d, r = %0.3f, ave_regret = %0.3f" % (t, np.cumsum(self.reward)[len(self.reward)-1], (np.cumsum(self.opt_reward) - np.cumsum(self.reward))[len(self.reward)-1]/(t+1)), flush=True)
-                if "num_unif" in dir(self):
-                    print("num_unif = %d" % (self.num_unif))
             if validate != None and t != 0 and t % 500 == 0:
                 val = validate.offline_evaluate(self, train=False)
                 if verbose:
@@ -895,12 +893,14 @@ if __name__=='__main__':
     if Args.dataset == 'mslr30k' and Args.I < 20:
         order = np.load(settings.DATA_DIR+"mslr/mslr30k_train_%d.npz" % (Args.I))
         print("Setting order for Iteration %d" % (Args.I), flush=True)
-        B.contexts.order = order['order']
+        o = order['order']
+        B.contexts.order = o[np.where(o < B.contexts.X)[0]]
         B.contexts.curr_idx = 0
     if Args.dataset == 'yahoo' and Args.I < 20:
         order = np.load(settings.DATA_DIR+"yahoo/yahoo_train_%d.npz" % (Args.I))
         print("Setting order for Iteration %d" % (Args.I), flush=True)
-        B.contexts.order = order['order']
+        o = order['order']
+        B.contexts.order = o[np.where(o < B.contexts.X)[0]]
         B.contexts.curr_idx = 0
 
     print("Setting seed for Iteration %d" % (Args.I), flush=True)
