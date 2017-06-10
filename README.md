@@ -16,9 +16,9 @@ Experimentation for oracle based contextual bandit algorithms.
    * For MSLR: 
       * Visit https://www.microsoft.com/en-us/research/project/mslr/
       * Download MSLR-WEB30K dataset
-      * Unpack it into settings.DATA\_DIR/mslr/ you should have 5 files named mslr30k_train<#>.txt where <#> is 1 through 5.
+      * Unpack it into settings.DATA\_DIR/mslr/ you should have 5 files named mslr30k_train<#>.txt where <#> is 1 through 5. This is different from the default directory structure of the dataset, so you will have to rename the files. 
       * ```$ python3 PreloadMSLR.py``` -- This will produce a file settings.DATA\_DIR/mslr/mslr30k_train.npz which is required for experiments.
-   * For Yahoo: @akshaykr fill me in
+   * For Yahoo:
       * You need to get the dataset, this is somewhat involved. The dataset is C14B here: https://webscope.sandbox.yahoo.com/catalog.php?datatype=c
       * Unpack it into settings.DATA\_DIR/yahoo/ you should have 6 files named set<#>.<$>.txt where <#> is either 1 or 2 and <$> is train, valid, or test.
       * ``` $ python3 PreloadYahoo.py``` -- This will produce a file settings.DATA\_DIR/yahoo/yahoo_big.npz which is required for experiments.
