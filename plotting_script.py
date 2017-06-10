@@ -49,7 +49,7 @@ ax.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='of
 
 std = True
 legendHandles = []
-keys = ['lin', 'mini_lin', 'epsall_lin', 'mini_gb2', 'epsall_gb2', 'mini_gb5', 'epsall_gb5']
+keys = ['epsall_lin', 'mini_lin', 'epsall_gb2', 'mini_gb2', 'epsall_gb5', 'mini_gb5', 'lin']
 for k in keys:
     params = []
     mus = []

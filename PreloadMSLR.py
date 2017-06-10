@@ -109,3 +109,6 @@ def preprocess():
     print("Datasets:loadTxt [INFO] Loaded"
           " [Min,Max]NumDocs: ", np.min(docsPerQuery), np.max(docsPerQuery), flush = True)
     return (docsPerQuery, relevances, features)
+
+if __name__=='__main__':
+    preprocess()
