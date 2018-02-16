@@ -1,4 +1,5 @@
 import sys, argparse, os
+sys.path.append('../')
 import settings
 
 if __name__=='__main__':

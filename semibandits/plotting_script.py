@@ -4,6 +4,7 @@ import matplotlib.patches
 import matplotlib as mpl
 import numpy as np
 import sys, argparse
+sys.path.append("../")
 import Plotting
 
 Names = {
@@ -30,8 +31,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--save', dest='save', action='store_true')
 Args = parser.parse_args(sys.argv[1:])
 
-D1 = Plotting.read_dir("./results/mslr30k_T=36000_L=3_e=0.1/")
-D2 = Plotting.read_dir("./results/yahoo_T=40000_L=2_e=0.5/")
+D1 = Plotting.read_dir("../results/mslr30k_T=36000_L=3_e=0.1/")
+D2 = Plotting.read_dir("../results/yahoo_T=40000_L=2_e=0.5/")
 
 
 print(mpl.rcParams['figure.figsize'])
@@ -154,8 +155,8 @@ tt2 = plt.title('Dataset: Yahoo!',fontsize=18)
 tt2.set_position([0.5, 1.02])
 plt.gcf().subplots_adjust(bottom=0.25)
 if Args.save:
-    plt.savefig("./figs/plots_grouped.png", format='png', dpi=100, bbox_inches='tight')
-    plt.savefig("./figs/plots_grouped.pdf", format='pdf', dpi=100, bbox_inches='tight')
+    plt.savefig("../figs/plots_grouped.png", format='png', dpi=100, bbox_inches='tight')
+    plt.savefig("../figs/plots_grouped.pdf", format='pdf', dpi=100, bbox_inches='tight')
 else:
     plt.show()
 

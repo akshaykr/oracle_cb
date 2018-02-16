@@ -138,13 +138,13 @@ if __name__=='__main__':
             Alg = Semibandits.LinUCB(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1})
                 stop = time.time()
         if Args.alg == 'doubleml':
             Alg = DoubleML(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1})
                 stop = time.time()
         if Args.alg == 'minimonster':
             learning_alg = lambda: sklearn.linear_model.LinearRegression()

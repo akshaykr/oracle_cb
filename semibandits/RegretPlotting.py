@@ -217,6 +217,6 @@ if __name__=='__main__':
         plot_test(D)
 
     if Args.save:
-        plt.savefig("./figs/%s_%s.png" % (name, Args.type), format="png", dpi=100)
+        plt.savefig("../figs/%s_%s.png" % (name, Args.type), format="png", dpi=100)
     else:
         plt.show()

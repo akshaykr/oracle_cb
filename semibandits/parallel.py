@@ -1,4 +1,6 @@
 import numpy as np
+import sys
+sys.path.append("../")
 import settings
 
 eps_vals = np.logspace(-3, 0, 10) ## np.arange(0.01,0.21,0.01)
