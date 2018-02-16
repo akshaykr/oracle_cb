@@ -5,14 +5,14 @@ import matplotlib.patches
 import matplotlib as mpl
 
 def cv(prefix, Args):
-    best_double = None
+    best_bose = None
     best_lin = None
     best_mini = None
     best_eps = None
 
     for delta in deltas:
         x = []; y = [];
-        name = prefix+"doubleml_%0.5f_regrets.out" % (delta)
+        name = prefix+"bose_%0.5f_regrets.out" % (delta)
         f = open(name).readlines()
         for i in range(len(f)):
             x.append([float(z) for z in f[i].split(" ")])
@@ -21,9 +21,9 @@ def cv(prefix, Args):
         for i in range(len(f)):
             y.append([float(z) for z in f[i].split(" ")])
         score = np.mean(x,axis=0)[-1]
-        print('doubleml delta=%0.3f score=%0.2f' % (delta, score))
-        if best_double is None or score < best_double[1]:
-            best_double = [delta, score]
+        print('bose delta=%0.3f score=%0.2f' % (delta, score))
+        if best_bose is None or score < best_bose[1]:
+            best_bose = [delta, score]
         score = np.mean(y,axis=0)[-1]
         print('linucb delta=%0.3f score=%0.2f' % (delta, score))
         if best_lin is None or score < best_lin[1]:
@@ -48,11 +48,11 @@ def cv(prefix, Args):
         if best_eps is None or score < best_eps[1]:
             best_eps = [e, score]
 
-    return (best_double[0], best_lin[0], best_mini[0], best_eps[0])
+    return (best_bose[0], best_lin[0], best_mini[0], best_eps[0])
 
-def cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax, Args, kind='regrets',ylabel=True):
+def cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax, Args, kind='regrets',ylabel=True):
     x = []; y = []; m = []; e = []
-    f = open(prefix+"doubleml_%0.5f_%s.out" % (best_double, kind)).readlines()
+    f = open(prefix+"bose_%0.5f_%s.out" % (best_bose, kind)).readlines()
     for i in range(len(f)):
         x.append([float(z) for z in f[i].split(" ")])
     f = open(prefix+"linucb_%0.5f_%s.out" % (best_lin,kind)).readlines()
@@ -120,18 +120,18 @@ if __name__=='__main__':
         plt.subplots_adjust(left=0.03, right=0.99,bottom=0.3)
 
         prefix = '../results/linear_sphere_T=2000_d=10_K=2_sig=0.5/'
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax1, Args,kind=Args.kind)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax1, Args,kind=Args.kind)
         plt.title('Linear Sphere', fontsize=16)
         
         prefix = '../results/semiparametric_sphere_T=2000_d=10_K=2_sig=0.5/'
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax2, Args,kind=Args.kind,ylabel=False)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax2, Args,kind=Args.kind,ylabel=False)
         plt.title('Confounded Sphere', fontsize=16)
 
         prefix = '../results/semiparametric_pos_T=2000_d=10_K=2_sig=0.5/'
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        (legendHandles) = cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax3, Args,kind=Args.kind,ylabel=False)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        (legendHandles) = cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax3, Args,kind=Args.kind,ylabel=False)
         plt.title('Confounded Orthant', fontsize=16)
 
         leg = ax2.legend([x[1] for x in legendHandles], loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=False, shadow=False, ncol=7, frameon=False,fontsize=16)
@@ -157,13 +157,13 @@ if __name__=='__main__':
         ax.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
         
         prefix = '../results/%s_sphere_T=%d_d=%d_K=%d_sig=%0.1f/' % ('linear', Args.T, Args.d, Args.K, float(Args.noise))
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax1, Args,kind=Args.kind)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax1, Args,kind=Args.kind)
         plt.title('Linear Sphere d=%d K=%d' % (Args.d, Args.K))
         
         prefix = '../results/%s_pos_T=%d_d=%d_K=%d_sig=%0.1f/' % ('linear', Args.T, Args.d, Args.K, float(Args.noise))
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax2, Args,kind=Args.kind)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax2, Args,kind=Args.kind)
         plt.title('Linear Orthant d=%d K=%d' % (Args.d, Args.K))
 
         if Args.save:
@@ -181,13 +181,13 @@ if __name__=='__main__':
         ax.tick_params(labelcolor='none', top='off', bottom='off', left='off', right='off')
         
         prefix = '../results/%s_sphere_T=%d_d=%d_K=%d_sig=%0.1f/' % ('semiparametric', Args.T, Args.d, Args.K, float(Args.noise))
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax1, Args, kind=Args.kind)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax1, Args, kind=Args.kind)
         plt.title('Non-linear Sphere d=%d K=%d' % (Args.d, Args.K))
         
         prefix = '../results/%s_pos_T=%d_d=%d_K=%d_sig=%0.1f/' % ('semiparametric', Args.T, Args.d, Args.K, float(Args.noise))
-        (best_double, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_double, best_lin, best_mini, best_eps, ax2, Args, kind=Args.kind)
+        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax2, Args, kind=Args.kind)
         plt.title('Non-linear Orthant d=%d K=%d' % (Args.d, Args.K))
 
         if Args.save:

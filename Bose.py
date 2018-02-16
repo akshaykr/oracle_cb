@@ -6,10 +6,11 @@ import Semibandits
 
 
 
-class DoubleML(Semibandits.Semibandit):
+class BOSE(Semibandits.Semibandit):
     """
-    Implementation of Double ML LinUCB algorithm This algorithm only
-    works if features are available in the SemibanditSim object
+    Implementation of BOSE (bandit semiparametric orthogonalized
+    estimator) algorithm. This algorithm only works if features are
+    available in the SemibanditSim object
 
     The SemibanditSim must also expose B.D as an instance variable
     """
@@ -104,7 +105,7 @@ if __name__=='__main__':
     parser.add_argument('--d', action='store', default=20, type=int)
     parser.add_argument('--K', action='store', default=5, type=int)
 
-    parser.add_argument('--alg', action='store', default='all', choices=['linucb','doubleml','minimonster','epsgreedy'])
+    parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy'])
     parser.add_argument('--param', action='store', default=None)
     parser.add_argument('--noise', action='store', default=None)
                         
@@ -140,8 +141,8 @@ if __name__=='__main__':
                 start = time.time()
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1})
                 stop = time.time()
-        if Args.alg == 'doubleml':
-            Alg = DoubleML(S)
+        if Args.alg == 'bose':
+            Alg = BOSE(S)
             if Args.param is not None:
                 start = time.time()
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1})

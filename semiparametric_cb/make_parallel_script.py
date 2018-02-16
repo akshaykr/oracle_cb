@@ -28,12 +28,12 @@ if __name__=='__main__':
 cd ../
 """ % (job_name, job_name, job_name))
                 for feat in ['sphere', 'pos']:
-                    for alg in ['minimonster', 'epsgreedy', 'linucb', 'doubleml']:
+                    for alg in ['minimonster', 'epsgreedy', 'linucb', 'bose']:
                         for noise in [0.1, 0.5]:
-                            if alg == 'linucb' or alg=='doubleml':
-                                f.write("/mnt/nfs/work1/akshay/akshay/anaconda3/bin/python3 -W ignore DoubleML.py --dataset %s --T %d --d %d --K %d --iters %d --param %0.3f --alg %s --feat %s --noise %0.1f" % (dataset, T, d, K, iters, delta_vals[i], alg, feat, noise))
+                            if alg == 'linucb' or alg=='bose':
+                                f.write("/mnt/nfs/work1/akshay/akshay/anaconda3/bin/python3 -W ignore Bose.py --dataset %s --T %d --d %d --K %d --iters %d --param %0.3f --alg %s --feat %s --noise %0.1f" % (dataset, T, d, K, iters, delta_vals[i], alg, feat, noise))
                             else:
-                                f.write("/mnt/nfs/work1/akshay/akshay/anaconda3/bin/python3 -W ignore DoubleML.py --dataset %s --T %d --d %d --K %d --iters %d --param %0.3f --alg %s --feat %s --noise %0.1f" % (dataset, T, d, K, iters, eps_vals[i], alg, feat, noise))
+                                f.write("/mnt/nfs/work1/akshay/akshay/anaconda3/bin/python3 -W ignore Bose.py --dataset %s --T %d --d %d --K %d --iters %d --param %0.3f --alg %s --feat %s --noise %0.1f" % (dataset, T, d, K, iters, eps_vals[i], alg, feat, noise))
                             f.write("\n")
                 f.write("""sleep 1
 exit""")
