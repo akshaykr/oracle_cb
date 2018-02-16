@@ -284,7 +284,22 @@ class MQBandit(SemibanditSim):
         return score
 
 class LinearBandit(SemibanditSim):
-    def __init__(self, d, L, K, noise=False):
+    class LinearContext():
+        def __init__(self,name,features):
+            self.features = features
+            self.name = name
+        def get_ld_features(self):
+            return self.features
+        def get_K(self):
+            return self.features.shape[0]
+        def get_L(self):
+            return 1
+        def get_ld_dim(self):
+            return self.features.shape[1]
+        def get_name(self):
+            return self.name
+
+    def __init__(self, d, L, K, noise=False, seed=None, pos=False, quad=True):
         """
         A Linear semi-bandit simulator. Generates a random unit weight
         vector upon initialization. At each round, random unit-normed
@@ -298,7 +313,6 @@ class LinearBandit(SemibanditSim):
         L actions per slate
         K actions per context
 
-        Currently deprecated
         """
         self.d = d
         self.L = L
@@ -306,36 +320,166 @@ class LinearBandit(SemibanditSim):
         self.N = None
         self.X = None
         self.noise = noise
+        self.seed = seed
+        self.pos = pos
+        self.quad = quad
 
-        self.weights = np.matrix(np.random.normal(0, 1, [self.d,1]))
-        self.weights = self.weights/np.sqrt(self.weights.T*self.weights)
+        if seed is not None:
+            np.random.seed(574)
+
+        if self.pos:
+            self.weights = np.matrix(np.random.dirichlet(d*np.ones(self.d))).T
+            self.weights = self.weights/np.linalg.norm(self.weights)
+        else:
+            self.weights = np.matrix(np.random.normal(0, 1, [self.d,1]))
+            self.weights = self.weights/np.sqrt(self.weights.T*self.weights)
+
+        if seed is not None:
+            np.random.seed(seed)
 
         self.t = 0
         self.curr_x = None
         self.features = None
         self.all_features = []
         self.curr_r = None
+        self.curr_x = None
 
     def get_new_context(self):
         ## Generate random feature matrix and normalize.
-        self.features = np.matrix(np.random.normal(0, 1, [self.K, self.d]))
+        if self.seed is not None:
+            np.random.seed((self.t+17)*(self.seed+1) + 37)
+
+        if self.pos:
+            self.features = np.matrix(np.random.dirichlet(1.0/self.d*np.ones(self.d), self.K))
+        else:
+            self.features = np.matrix(np.random.normal(0, 1, [self.K, self.d]))
+
         self.features = np.diag(1./np.sqrt(np.diag(self.features*self.features.T)))*self.features
         self.all_features.append(self.features)
 
-        self.curr_means = (1+self.features*self.weights)/2
-        self.curr_means = np.array(self.curr_means.T)[0]
-        if self.noise:
-            self.curr_r = np.random.binomial(1, self.curr_means)
+        self.curr_means = np.array((self.features*self.weights).T)[0]
+        if self.quad:
+            self.curr_means = self.curr_means**2
+        if self.noise and type(self.noise) == float:
+            self.noise_term = np.random.normal(0,self.noise)
+            self.curr_r = np.array(self.curr_means+self.noise_term)
+        elif self.noise:
+            self.noise_term = np.random.normal(0, 0.1)
+            self.curr_r = np.array(self.curr_means+self.noise_term)
         else:
-            self.curr_r = self.curr_means
-        ## self.curr_r = np.array(self.curr_r.T)[0]
+            self.curr_r = np.array(self.curr_means)
+
         old_t = self.t
         self.t += 1
-        return old_t
+        self.curr_x = LinearBandit.LinearContext(self.t, self.features)
+        return self.curr_x
 
     def get_best_reward(self):
         idx = np.argsort(self.curr_means)
         return np.sum(self.curr_r[idx[len(idx)-self.L:len(idx)]])
+
+    def get_slate_reward(self, A):
+        return self.curr_r[A]
+
+class SemiparametricBandit(SemibanditSim):
+    class LinearContext():
+        def __init__(self,name,features):
+            self.features = features
+            self.name = name
+        def get_ld_features(self):
+            return self.features
+        def get_K(self):
+            return self.features.shape[0]
+        def get_L(self):
+            return 1
+        def get_ld_dim(self):
+            return self.features.shape[1]
+        def get_name(self):
+            return self.name
+
+    def __init__(self, d, L, K, noise=False, seed=None, pos=False):
+        """
+        A Linear semi-bandit simulator. Generates a random unit weight
+        vector upon initialization. At each round, random unit-normed
+        feature vectors are drawn for each action, and reward is (if
+        noise) a bernoulli with mean (1+x_a^Tw)/2 or just (1+x_a^Tw)/2.
+
+        The learner plays a slate of L actions and K actions are
+        available per round.
+
+        d is the dimension of the feature space
+        L actions per slate
+        K actions per context
+        noise = Add gaussian noise?
+        seed = random seed
+        pos = all vectors in positive orthant?
+        """
+        self.d = d
+        self.L = L
+        self.K = K
+        self.N = None
+        self.X = None
+        self.noise = noise
+        self.seed = seed
+        self.pos = pos
+
+        if seed is not None:
+            np.random.seed(574)
+        if self.pos:
+            self.weights = np.matrix(np.random.dirichlet(np.ones(self.d))).T
+            self.weights = self.weights/np.linalg.norm(self.weights)
+        else:
+            self.weights = np.matrix(np.random.normal(0, 1, [self.d,1]))
+            self.weights = self.weights/np.sqrt(self.weights.T*self.weights)
+
+        if seed is not None:
+            np.random.seed(seed)
+
+        self.t = 0
+        self.curr_x = None
+        self.features = None
+        self.all_features = []
+        self.curr_r = None
+        self.curr_x = None
+
+    def get_new_context(self):
+        ## Generate random feature matrix and normalize.
+        if self.seed is not None:
+            np.random.seed((self.t+17)*(self.seed+1) + 37)
+
+        if self.pos:
+            self.features = np.matrix(np.random.dirichlet(1.0/self.d*np.ones(self.d), self.K))
+        else:
+            self.features = np.matrix(np.random.normal(0, 1, [self.K, self.d]))
+
+        self.features = np.diag(1./np.sqrt(np.diag(self.features*self.features.T)))*self.features
+        self.all_features.append(self.features)
+
+        self.curr_means = np.array((self.features*self.weights).T)[0]
+        self.curr_offset = -1*np.max(self.curr_means)
+        ## self.curr_offset = 0
+        ## self.curr_offset = (self.features[0,:]*self.weights)**2
+        if self.noise and type(self.noise) == float:
+            self.noise_term = np.random.normal(0, self.noise)
+            self.curr_r = np.array(self.curr_means+self.curr_offset+self.noise_term)
+        elif self.noise:
+            self.noise_term = np.random.normal(0, 0.1)
+            self.curr_r = np.array(self.curr_means+self.curr_offset+self.noise_term)
+        else:
+            self.curr_r = np.array(self.curr_means+self.curr_offset)
+        ## self.curr_r = np.array(self.curr_r.T)[0]
+        old_t = self.t
+        self.t += 1
+        self.curr_x = SemiparametricBandit.LinearContext(self.t, self.features)
+        return self.curr_x
+
+    def get_best_reward(self):
+        idx = np.argsort(self.curr_means)
+        return np.sum(self.curr_r[idx[len(idx)-self.L:len(idx)]])
+
+    def get_slate_reward(self, A):
+        return self.curr_r[A]
+
 
 class MSLRBandit(SemibanditSim):
     """

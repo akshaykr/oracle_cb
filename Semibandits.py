@@ -151,6 +151,8 @@ class EpsGreedy(Semibandit):
             self.use_reward_features = True
             if 'weight' in params.keys():
                 self.weights = params['weight']
+            elif self.B.L == 1:
+                self.weights=np.array([1.0])
             else:
                 self.weights = self.B.weight
 
@@ -175,11 +177,22 @@ class EpsGreedy(Semibandit):
 
         self.training_points = []
         i = 4
+        ## Default training schedule is exponential
         while True:
             self.training_points.append(int(np.sqrt(2)**i))
             i+=1
             if np.sqrt(2)**i > T:
                 break
+        if 'schedule' in params.keys():
+            if params['schedule'] == 'lin':
+                ## Switch to linear training schedule with step 100
+                self.training_points = [50]
+                i=1
+                while True:
+                    self.training_points.append(int(i*100))
+                    i+=1
+                    if i*100>T:
+                        break
         print(self.training_points)
 
         self.reward = []
@@ -283,6 +296,10 @@ class LinUCB(Semibandit):
             self.delta = params['delta']
         else:
             self.delta = 0.05
+        if "schedule" in params.keys():
+            self.schedule = params['schedule']
+        else:
+            self.schedule = 100
 
         self.reward = []
         self.opt_reward = []
@@ -297,7 +314,7 @@ class LinUCB(Semibandit):
             self.b_vec += y_vec[i]*features[A[i],:].T
 
         self.t += 1
-        if self.t % 100 == 0:
+        if self.t % self.schedule == 0:
             self.Cinv = scipy.linalg.inv(self.cov)
             self.weights = self.Cinv*self.b_vec
 
@@ -499,12 +516,22 @@ class MiniMonster(Semibandit):
     def init(self, T, params={}):
         self.training_points = []
         i = 4
+        ## Default training schedule is exponential
         while True:
-            ## self.training_points.append(int(np.sqrt(2)**i))
             self.training_points.append(int(np.sqrt(2)**i))
             i+=1
             if np.sqrt(2)**i > T:
                 break
+        if 'schedule' in params.keys():
+            if params['schedule'] == 'lin':
+                ## Switch to linear training schedule with step 100
+                self.training_points = [50]
+                i=1
+                while True:
+                    self.training_points.append(int(i*100))
+                    i+=1
+                    if i*100>T:
+                        break
         print(self.training_points)
 
         self.reward = []
@@ -678,7 +705,6 @@ class MiniMonster(Semibandit):
         updated = True
         iterations = 0
         while updated and iterations < 20:
-            print("OP Iteration")
             iterations += 1
             updated = False
             ## First IF statement
