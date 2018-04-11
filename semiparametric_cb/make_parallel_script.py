@@ -3,7 +3,7 @@ import numpy as np
 if __name__=='__main__':
     T = 1000
     ds = [5, 10, 15, 20, 50, 100]
-    K = 2
+    K = 5
     delta_vals = np.logspace(-3,1,20)
     eps_vals = np.logspace(-3,0,20)
     iters = 10
