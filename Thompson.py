@@ -19,6 +19,7 @@ class Thompson(Semibandits.Semibandit):
         self.lam = 0.1
         if 'lambda' in params:
             self.lam = params['lambda']
+        print (self.lam)
         self.Cinv = scipy.linalg.inv(self.cov)
         self.weights = self.Cinv*self.b_vec
         self.t=1
@@ -43,7 +44,7 @@ class Thompson(Semibandits.Semibandit):
         w = np.array(self.weights.T)[0]
         mut = np.matrix(np.random.multivariate_normal(w, self.lam*self.Cinv))
         scores = features*mut.T
-        scores = [scores[0,0] for a in scores]
+        scores = [scores[a,0] for a in range(K)]
         
         ranks = np.argsort(scores)
         return ranks[K-self.B.L:K]
