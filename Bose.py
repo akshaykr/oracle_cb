@@ -166,7 +166,7 @@ if __name__=='__main__':
             Alg = Thompson.Thompson(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'lambda':Args.param,'train_all':True})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'lambda':Args.param})
                 stop = time.time()
         rewards.append(r)
         regrets.append(reg)
