@@ -105,7 +105,7 @@ if __name__=='__main__':
     parser.add_argument('--d', action='store', default=20, type=int)
     parser.add_argument('--K', action='store', default=5, type=int)
 
-    parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy'])
+    parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy', 'thompson'])
     parser.add_argument('--param', action='store', default=None)
     parser.add_argument('--noise', action='store', default=None)
                         
@@ -161,7 +161,13 @@ if __name__=='__main__':
                 start = time.time()
                 (r,reg,val_tmp)=Alg.play(Args.T, verbose=True, params={'eps':Args.param,'train_all':True,'schedule':'lin'})
                 stop=time.time()
-
+        if Args.alg == 'thompson':
+            import Thompson
+            Alg = Thompson.Thompson(S)
+            if Args.param is not None:
+                start = time.time()
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'lambda':Args.param,'train_all':True})
+                stop = time.time()
         rewards.append(r)
         regrets.append(reg)
 
