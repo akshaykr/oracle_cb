@@ -299,7 +299,7 @@ class LinearBandit(SemibanditSim):
         def get_name(self):
             return self.name
 
-    def __init__(self, d, L, K, noise=False, seed=None, pos=False, quad=True):
+    def __init__(self, d, L, K, noise=False, seed=None, pos=False, quad=False):
         """
         A Linear semi-bandit simulator. Generates a random unit weight
         vector upon initialization. At each round, random unit-normed

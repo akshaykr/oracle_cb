@@ -94,8 +94,8 @@ def cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax,
     plt.sca(ax)
     plt.xlim([0,Args.T])
     plt.xticks([0, 500, 1000, 1500, 2000], fontsize=16)
-    # plt.ylim([0,100])
-    # plt.yticks([0,50,100], fontsize=16)
+    plt.ylim([0,100])
+    plt.yticks([0,50,100], fontsize=16)
     plt.xlabel('T', fontsize=16)
     if ylabel:
         plt.ylabel('Regret', fontsize=16)
@@ -138,18 +138,18 @@ if __name__=='__main__':
         plt.subplots_adjust(left=0.03, right=0.99,bottom=0.3)
 
         prefix = '../results/linear_sphere_T=2000_d=10_K=2_sig=0.5/'
-        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax1, Args,kind=Args.kind)
+        (best_bose, best_lin, best_thompson, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax1, Args,kind=Args.kind)
         plt.title('Linear Sphere', fontsize=16)
         
         prefix = '../results/semiparametric_sphere_T=2000_d=10_K=2_sig=0.5/'
-        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax2, Args,kind=Args.kind,ylabel=False)
+        (best_bose, best_lin, best_thompson, best_mini, best_eps) = cv(prefix, Args)
+        cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax2, Args,kind=Args.kind,ylabel=False)
         plt.title('Confounded Sphere', fontsize=16)
 
         prefix = '../results/semiparametric_pos_T=2000_d=10_K=2_sig=0.5/'
-        (best_bose, best_lin, best_mini, best_eps) = cv(prefix, Args)
-        (legendHandles) = cv_plot(prefix, best_bose, best_lin, best_mini, best_eps, ax3, Args,kind=Args.kind,ylabel=False)
+        (best_bose, best_lin, best_thompson, best_mini, best_eps) = cv(prefix, Args)
+        (legendHandles) = cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax3, Args,kind=Args.kind,ylabel=False)
         plt.title('Confounded Orthant', fontsize=16)
 
         leg = ax2.legend([x[1] for x in legendHandles], loc='upper center', bbox_to_anchor=(0.5, -0.15), fancybox=False, shadow=False, ncol=7, frameon=False,fontsize=16)
