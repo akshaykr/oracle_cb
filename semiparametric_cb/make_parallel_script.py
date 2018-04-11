@@ -1,8 +1,8 @@
 import numpy as np
 
 if __name__=='__main__':
-    T = 1000
-    ds = [5, 10, 15, 20, 50, 100]
+    T = 2000
+    ds = [10] ## , 15, 20, 50, 100]
     K = 5
     delta_vals = np.logspace(-3,1,20)
     eps_vals = np.logspace(-3,0,20)
@@ -10,7 +10,7 @@ if __name__=='__main__':
     start = 0
 
     for d in ds:
-        for i in len(delta_vals)
+        for i in range(len(delta_vals)):
             for dataset in ['linear', 'semiparametric']:
                 job_name = '%s_d=%d_K=%d_delta=%0.3f' % (dataset, d, K, delta_vals[i])
                 jobfile = '../jobs/%s' % (job_name)
