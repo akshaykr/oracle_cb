@@ -106,6 +106,8 @@ def cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax,
     legendHandles.append((matplotlib.patches.Patch(color=l4[0].get_color(), label="EpsGreedy"), "EpsGreedy"))
     legendHandles.append((matplotlib.patches.Patch(color=l5[0].get_color(), label="Thompson"), "Thompson"))
     # plt.legend(['Ours', 'LinUCB', 'ILTCB', 'EpsGreedy'])
+
+    print ("Bose %0.2f, LinUCB %0.2f, ILTCB %0.2f, EpsGreedy %0.2f, Thompson %0.2f" % (np.mean(x,axis=0)[-1], np.mean(y,axis=0)[-1], np.mean(m,axis=0)[-1], np.mean(e,axis=0)[-1], np.mean(z,axis=0)[-1]))
     return(legendHandles)
 
 if __name__=='__main__':
