@@ -51,8 +51,9 @@ def langevin_step(model, features, targets, lr, iters=512, noise=True, debug=Fal
     Y = Variable(torch.FloatTensor(targets))
     for i in range(1,iters+1):
         model.zero_grad()
-        output = model(X)
-        loss = Y.dot(torch.clamp(1+output, 0.0))/Y.shape[0]
+        output = model(X)[0][0]
+        v = Y[0][0]
+        loss = v.dot(torch.clamp(1+output, 0.0))/Y.shape[0]
         if np.log2(i) == np.floor(np.log2(i)) and debug:
             print("Iteration %d, Loss %0.3f" % (i, loss.data[0]))
         loss.backward()
