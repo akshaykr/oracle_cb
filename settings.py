@@ -1,4 +1,4 @@
 BASE_DIR=""
-DATA_DIR=BASE_DIR+"data/"
-REMOTE_PATH_TO_PYTHON="/home/REDMOND/akshaykr/anaconda3/bin/python3"
-REMOTE_BASE_DIR="~/projects/semibandits/code/"
+DATA_DIR="/mnt/nfs/work1/akshay/akshay/projects/oracle_cb/data/"
+REMOTE_PATH_TO_PYTHON="/mnt/nfs/work1/akshay/akshay/anaconda3/python3"
+REMOTE_BASE_DIR="/mnt/nfs/work1/akshay/akshay/projects/oracle_cb/"

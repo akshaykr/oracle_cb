@@ -28,9 +28,9 @@ if __name__=='__main__':
 cd ../
 """ % (job_name, job_name, job_name))
                 for feat in ['sphere', 'pos']:
-                    for alg in ['minimonster', 'epsgreedy', 'linucb', 'bose', 'thompson']:
+                    for alg in ['epsgreedy', 'linucb', 'bose', 'thompson', 'bag']:
                         for noise in [0.1, 0.5]:
-                            if alg == 'linucb' or alg=='bose' or alg == 'thompson':
+                            if alg == 'linucb' or alg=='bose' or alg == 'thompson' or alg=='bag':
                                 f.write("/mnt/nfs/work1/akshay/akshay/anaconda3/bin/python3 -W ignore Bose.py --dataset %s --T %d --d %d --K %d --iters %d --param %0.3f --alg %s --feat %s --noise %0.1f" % (dataset, T, d, K, iters, delta_vals[i], alg, feat, noise))
                             else:
                                 f.write("/mnt/nfs/work1/akshay/akshay/anaconda3/bin/python3 -W ignore Bose.py --dataset %s --T %d --d %d --K %d --iters %d --param %0.3f --alg %s --feat %s --noise %0.1f" % (dataset, T, d, K, iters, eps_vals[i], alg, feat, noise))
