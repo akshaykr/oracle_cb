@@ -34,7 +34,7 @@ class Semibandit(object):
         self.opt_reward = []
         self.dist = [1.0/self.B.N for i in range(self.B.N)]
 
-    def play(self, T, params={}, verbose=True, validate=None):
+    def play(self, T, params={}, verbose=True, validate=None, loss=False):
         """
         Execute this algorithm on the semibandit simulator for T rounds.
 
@@ -66,8 +66,11 @@ class Semibandit(object):
             #     print('reward: ', " ".join([str(x) for x in self.B.get_base_rewards(p)]))
             self.reward.append(r)
             self.opt_reward.append(o)
-            self.update(x, p, self.B.get_base_rewards(p), self.B.get_slate_reward(p))
-        l1 = np.cumsum(self.reward)
+            if loss:
+                self.update(x, p, [1.0-a for a in self.B.get_base_rewards(p)], self.B.get_slate_reward(p))
+            else:
+                self.update(x, p, self.B.get_base_rewards(p), self.B.get_slate_reward(p))
+            l1 = np.cumsum(self.reward)
         l2 = np.cumsum(self.opt_reward)
         return (l1[9::10], (l2-l1)[9::10], self.val_scores)
 

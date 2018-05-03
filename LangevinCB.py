@@ -38,8 +38,8 @@ class LangevinCB(Semibandits.Semibandit):
         self.lr = 0.1
 
         ## Burn in
-        self.burn_in = 100
-        self.step = 10
+        self.burn_in = 25
+        self.step = 25
         
     def update(self, x, A, y_vec, r):
         full_rvec = np.zeros(x.get_K())
@@ -53,8 +53,10 @@ class LangevinCB(Semibandits.Semibandit):
         if unif:
             act = np.random.choice(x.get_K(), size=x.get_L(), replace=False)
         else:
-            draw = np.random.multinomial(1, p_vec)
-            act = np.where(draw)[0][0]
+            draw = np.random.choice(range(len(p_vec)), p=p_vec)
+            # draw = np.random.multinomial(1, p_vec)
+            # act = np.where(draw)[0][0]
+            act = draw
         return act
 
     def get_action(self,x):
@@ -162,7 +164,9 @@ class BagCB(Semibandits.Semibandit):
 
 if __name__=='__main__':
     S = Simulators.LinearBandit(10, 1, 2, noise=True, pos=False)
-    
-    # L = LangevinCB(S)
-    L = BagCB(S)
-    L.play(5000, params={'M': 10})
+    # S = Simulators.DatasetBandit(L=1, loop=False, dataset='mslr30k', metric=None)
+
+    L = LangevinCB(S)
+    L.play(5000, params={'mu': 0.05})
+    # L = BagCB(S)
+    # L.play(5000, params={'M': 10})

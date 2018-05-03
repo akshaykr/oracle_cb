@@ -105,9 +105,10 @@ if __name__=='__main__':
     parser.add_argument('--d', action='store', default=20, type=int)
     parser.add_argument('--K', action='store', default=5, type=int)
 
-    parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy', 'thompson', 'bag'])
+    parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy', 'thompson', 'bag', 'langevin'])
     parser.add_argument('--param', action='store', default=None)
     parser.add_argument('--noise', action='store', default=None)
+    parser.add_argument('--loss', action='store', default=False)
                         
 
     Args = parser.parse_args(sys.argv[1:])
@@ -169,11 +170,18 @@ if __name__=='__main__':
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'lambda':Args.param})
                 stop = time.time()
         if Args.alg == 'bag':
-            import LangevinCB
-            Alg = LangevinCB.BagCB(S)
+            import LangevinCB, NNModels
+            Alg = LangevinCB.BagCB(S) # , model=NNModels.TwoLayer)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'lr': Args.param})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'lr': Args.param}, loss=Args.loss)
+                stop = time.time()
+        if Args.alg == 'langevin':
+            import LangevinCB, NNModels
+            Alg = LangevinCB.LangevinCB(S) # ,model=NNModels.TwoLayer)
+            if Args.param is not None:
+                start = time.time()
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param}, loss=Args.loss)
                 stop = time.time()
         rewards.append(r)
         regrets.append(reg)
