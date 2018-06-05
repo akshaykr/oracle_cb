@@ -13,7 +13,7 @@ def cv(prefix, Args):
 
     for delta in deltas:
         x = []; y = []; z = [];
-        name = prefix+"bose_%0.5f_regrets.out" % (delta)
+        name = prefix+"doubleml_%0.5f_regrets.out" % (delta)
         f = open(name).readlines()
         for i in range(len(f)):
             x.append([float(a) for a in f[i].split(" ")])
@@ -64,7 +64,7 @@ def cv(prefix, Args):
 
 def cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax, Args, kind='regrets',ylabel=True):
     x = []; y = []; z = []; m = []; e = []
-    f = open(prefix+"bose_%0.5f_%s.out" % (best_bose, kind)).readlines()
+    f = open(prefix+"doubleml_%0.5f_%s.out" % (best_bose, kind)).readlines()
     for i in range(len(f)):
         x.append([float(a) for a in f[i].split(" ")])
     f = open(prefix+"linucb_%0.5f_%s.out" % (best_lin,kind)).readlines()
@@ -101,13 +101,13 @@ def cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax,
         plt.ylabel('Regret', fontsize=16)
     legendHandles = []
     legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="BOSE"), "BOSE"))
-    legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="LinUCB"), "LinUCB"))
+    legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="OFUL"), "OFUL"))
     legendHandles.append((matplotlib.patches.Patch(color=l3[0].get_color(), label="ILTCB"), "ILTCB"))
     legendHandles.append((matplotlib.patches.Patch(color=l4[0].get_color(), label="EpsGreedy"), "EpsGreedy"))
     legendHandles.append((matplotlib.patches.Patch(color=l5[0].get_color(), label="Thompson"), "Thompson"))
     # plt.legend(['Ours', 'LinUCB', 'ILTCB', 'EpsGreedy'])
 
-    print ("Bose %0.2f, LinUCB %0.2f, ILTCB %0.2f, EpsGreedy %0.2f, Thompson %0.2f" % (np.mean(x,axis=0)[-1], np.mean(y,axis=0)[-1], np.mean(m,axis=0)[-1], np.mean(e,axis=0)[-1], np.mean(z,axis=0)[-1]))
+    print ("Bose %0.2f, OFUL %0.2f, ILTCB %0.2f, EpsGreedy %0.2f, Thompson %0.2f" % (np.mean(x,axis=0)[-1], np.mean(y,axis=0)[-1], np.mean(m,axis=0)[-1], np.mean(e,axis=0)[-1], np.mean(z,axis=0)[-1]))
     return(legendHandles)
 
 if __name__=='__main__':
