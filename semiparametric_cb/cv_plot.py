@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches
 import matplotlib as mpl
 
+deltas = [float('%0.3f' % x) for x in np.logspace(-3,1,20)]
+eps = [float('%0.3f' % x) for x in np.logspace(-3,0,20)]
+
 def cv(prefix, Args):
     best_bose = None
     best_lin = None
@@ -161,6 +164,7 @@ if __name__=='__main__':
         plt.tight_layout()
         if Args.save:
             plt.savefig("../figs/final.pdf", format='pdf', dpi=100,bbox_inches='tight')
+            plt.savefig("../figs/final.eps", format='eps', dpi=100,bbox_inches='tight')
         else:
             plt.show()
 
@@ -211,6 +215,7 @@ if __name__=='__main__':
         plt.title('Non-linear Orthant d=%d K=%d' % (Args.d, Args.K))
 
         if Args.save:
+            plt.savefig('../figs/semiparametric_%s_T=%d_d=%d_K=%d_sig=%0.1f.eps' % (Args.kind, Args.T, Args.d, Args.K, float(Args.noise)), format='eps', dpi=100,bbox_inches='tight')
             plt.savefig('../figs/semiparametric_%s_T=%d_d=%d_K=%d_sig=%0.1f.pdf' % (Args.kind, Args.T, Args.d, Args.K, float(Args.noise)), format='pdf', dpi=100,bbox_inches='tight')
 
         if not Args.save:
