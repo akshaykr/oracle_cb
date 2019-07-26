@@ -5,9 +5,46 @@ import scipy.linalg
 import Semibandits
 
 
+class LinearContext():
+    def __init__(self,name,features):
+        self.features = features
+        self.name = name
+    def get_ld_features(self):
+        return self.features
+    def get_K(self):
+        return self.features.shape[0]
+    def get_L(self):
+        return 1
+    def get_ld_dim(self):
+        return self.features.shape[1]
+    def get_name(self):
+        return self.name
+
+def truncate_context(context, d):
+    return LinearContext(context.get_name(), context.get_ld_features()[:,0:d])
+        
+
 class LimeCB(Semibandits.Semibandit):
+    class PassthroughSimulator(Simulators.LinearBandit):
+        def __init__(self,B, d):
+            self.B = B
+            self.d = d
+            self.K = self.B.K
+            self.L = self.B.L
+        
+
     def __init__(self,B):
         self.B = B
+
+    def init_linucb(self):
+        self.base_learner = Semibandits.LinUCB(self.passthrough)
+        self.base_learner.init(self.T,params={'delta': self.delta})
+        
+    def init_minimonster(self):
+        learning_alg = lambda: sklearn.linear_model.LinearRegression()
+        self.base_learner = Semibandits.MiniMonster(self.passthrough,learning_alg=learning_alg,classification=False)
+        self.base_learner.init(self.T,params={'mu':self.mu,'schedule':'lin'})
+        self.base_learner.verbose = False
 
     def init(self, T, params={}):
 
@@ -44,6 +81,14 @@ class LimeCB(Semibandits.Semibandit):
         else:
             self.mu = 1
             
+        self.passthrough = LimeCB.PassthroughSimulator(self.B, self.d)
+        self.init_learner = None
+        if params['base'] == 'linucb':
+            self.init_learner = self.init_linucb
+        if params['base'] == 'minimonster':
+            self.init_learner = self.init_minimonster
+        self.init_learner()
+
         self.random = False
         self.reward = []
         self.opt_reward = []
@@ -63,11 +108,8 @@ class LimeCB(Semibandits.Semibandit):
         """
         Update the regression target and feature cov. 
         """
-        features = np.matrix(x.get_ld_features())
-        features = features[:,0:self.d]
-        for i in range(len(A)):
-            self.cov += features[A[i],:].T*features[A[i],:]
-            self.b_vec += y_vec[i]*features[A[i],:].T
+        if not self.random:
+            self.base_learner.update(truncate_context(x,self.d), A, y_vec, r)
 
         features = np.matrix(x.get_ld_features())
         for i in range(features.shape[0]):
@@ -78,10 +120,6 @@ class LimeCB(Semibandits.Semibandit):
                 self.random_samples += 1
 
         self.t += 1
-        if self.t % self.schedule == 0:
-            self.Cinv = scipy.linalg.inv(self.cov)
-            self.weights = self.Cinv*self.b_vec
-
         if self.t % 10 == 0:
             self.estimate_residual()
 
@@ -99,18 +137,7 @@ class LimeCB(Semibandits.Semibandit):
             return [act]
         else:
             self.random = False
-            features = np.matrix(x.get_ld_features())
-            features = features[:,0:self.d]
-            K = x.get_K()
-            # Cinv = scipy.linalg.inv(self.cov)
-            # self.weights = Cinv*self.b_vec
-            
-            alpha = np.sqrt(self.d)*self.delta ## *np.log((1+self.t*K)/self.delta)) + 1
-            ucbs = [features[k,:]*self.weights + alpha*np.sqrt(features[k,:]*self.Cinv*features[k,:].T) for k in range(K)]
-            
-            ucbs = [a[0,0] for a in ucbs]
-            ranks = np.argsort(ucbs)
-            return ranks[K-self.B.L:K]
+            return self.base_learner.get_action(truncate_context(x, self.d))
 
     def estimate_residual(self):
         to_move = None
@@ -130,10 +157,8 @@ class LimeCB(Semibandits.Semibandit):
                 ### Then we switch!
                 print("[LimeCB] Switching to d=%d" % (d), flush=True)
                 self.d = d
-                self.b_vec = np.matrix(np.zeros((self.d,1)))
-                self.cov = np.matrix(np.eye(self.d))
-                self.Cinv = scipy.linalg.inv(self.cov)
-                self.weights = self.Cinv*self.b_vec
+                self.passthrough = LimeCB.PassthroughSimulator(self.B, self.d)
+                self.init_learner()
                 done = True
             
 if __name__=='__main__':
@@ -142,11 +167,9 @@ if __name__=='__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--T', action='store', default=50000, help='number of rounds', type=int)
-    parser.add_argument('--dataset', action='store', choices=['linear', 'semiparametric'])
-    parser.add_argument('--feat', action='store', choices=['sphere','pos'])
-    ## parser.add_argument('--start', action='store', default=0, type=int)
     parser.add_argument('--iters', action='store', default=1, type=int)
     parser.add_argument('--d', action='store', default=20, type=int)
+    parser.add_argument('--s', action='store', default=20, type=int)
     parser.add_argument('--K', action='store', default=5, type=int)
 
     parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy', 'thompson', 'bag', 'langevin', 'limecb'])
@@ -160,7 +183,7 @@ if __name__=='__main__':
     if Args.noise is not None:
         Args.noise = float(Args.noise)
 
-    outdir = './results/%s_%s_T=%d_d=%d_K=%d_sig=%0.1f/' % (Args.dataset, Args.feat, Args.T, Args.d, Args.K, Args.noise)
+    outdir = './results/T=%d_d=%d_s=%d_K=%d_sig=%0.1f/' % (Args.T, Args.d, Args.s, Args.K, Args.noise)
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
 
@@ -170,9 +193,7 @@ if __name__=='__main__':
     rewards = []
     regrets = []
     for i in range(Args.iters):
-        if Args.dataset =='linear' and Args.feat=='sphere':
-            S = Simulators.LinearBandit(Args.d, 1, Args.K, noise=Args.noise, seed=i, pos=False)
-
+        S = Simulators.LinearBandit(Args.d, 1, Args.K, noise=Args.noise, seed=i, pos=False, low=Args.s)
         if Args.alg == 'linucb':
             Alg = Semibandits.LinUCB(S)
             if Args.param is not None:
@@ -183,7 +204,7 @@ if __name__=='__main__':
             Alg = LimeCB(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1, 'seed': i})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1, 'seed': i, 'base': 'minimonster'})
                 stop = time.time()
         if Args.alg == 'epsgreedy':
             learning_alg = lambda: sklearn.linear_model.LinearRegression()

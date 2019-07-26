@@ -299,7 +299,7 @@ class LinearBandit(SemibanditSim):
         def get_name(self):
             return self.name
 
-    def __init__(self, d, L, K, noise=False, seed=None, pos=False, quad=False):
+    def __init__(self, d, L, K, noise=False, seed=None, pos=False, quad=False, low=None):
         """
         A Linear semi-bandit simulator. Generates a random unit weight
         vector upon initialization. At each round, random unit-normed
@@ -323,6 +323,7 @@ class LinearBandit(SemibanditSim):
         self.seed = seed
         self.pos = pos
         self.quad = quad
+        self.low = low
 
         if seed is not None:
             np.random.seed(574)
@@ -333,6 +334,10 @@ class LinearBandit(SemibanditSim):
         else:
             self.weights = np.matrix(np.random.normal(0, 1, [self.d,1]))
             self.weights = self.weights/np.sqrt(self.weights.T*self.weights)
+        if self.low is not None:
+            self.weights = np.matrix(np.random.normal(0, 1, [self.d,1]))
+            self.weights[self.low:self.d] = 0
+            self.weights = self.weights/np.sqrt(self.weights.T*self.weights)            
 
         if seed is not None:
             np.random.seed(seed)
