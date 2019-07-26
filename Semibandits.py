@@ -535,7 +535,7 @@ class MiniMonster(Semibandit):
                     i+=1
                     if i*100>T:
                         break
-        print(self.training_points)
+        # print(self.training_points)
 
         self.reward = []
         self.opt_reward = []
