@@ -5,7 +5,7 @@ import scipy.linalg
 import Semibandits
 
 
-class LinearSelection(Semibandits.Semibandit):
+class LimeCB(Semibandits.Semibandit):
     def __init__(self,B):
         self.B = B
 
@@ -180,7 +180,7 @@ if __name__=='__main__':
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1})
                 stop = time.time()
         if Args.alg == 'limecb':
-            Alg = LinearSelection(S)
+            Alg = LimeCB(S)
             if Args.param is not None:
                 start = time.time()
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1, 'seed': i})
