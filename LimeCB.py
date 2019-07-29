@@ -35,6 +35,7 @@ class LimeCB(Semibandits.Semibandit):
 
     def __init__(self,B):
         self.B = B
+        self.override = None
 
     def init_linucb(self):
         self.base_learner = Semibandits.LinUCB(self.passthrough)
@@ -55,6 +56,8 @@ class LimeCB(Semibandits.Semibandit):
         self.dimensions = [2**i for i in range(1, int(np.log2(self.max_d)))]
         self.dimensions.append(self.max_d)
         
+        if self.override is not None:
+            self.dimensions = [self.override]
     
         self.d = self.dimensions[0]
     
@@ -83,6 +86,7 @@ class LimeCB(Semibandits.Semibandit):
             
         self.passthrough = LimeCB.PassthroughSimulator(self.B, self.d)
         self.init_learner = None
+        self.learner_type = params['base']
         if params['base'] == 'linucb':
             self.init_learner = self.init_linucb
         if params['base'] == 'minimonster':
@@ -114,7 +118,7 @@ class LimeCB(Semibandits.Semibandit):
         features = np.matrix(x.get_ld_features())
         for i in range(features.shape[0]):
             self.global_cov += features[i,:].T*features[i,:]
-        if self.random:
+        if self.random or (self.learner_type == 'minimonster' and self.base_learner.num_unif > self.base_num_unif):
             for i in range(len(A)):
                 self.global_b += y_vec[i]*features[A[i],:].T
                 self.random_samples += 1
@@ -137,6 +141,8 @@ class LimeCB(Semibandits.Semibandit):
             return [act]
         else:
             self.random = False
+            if self.learner_type == 'minimonster':
+                self.base_num_unif = self.base_learner.num_unif
             return self.base_learner.get_action(truncate_context(x, self.d))
 
     def estimate_residual(self):
@@ -149,11 +155,14 @@ class LimeCB(Semibandits.Semibandit):
             tmp = np.matrix(np.zeros((d,d)))
             tmp[0:self.d,0:self.d] = self.global_cov[0:self.d,0:self.d]
             Sigma = self.global_cov[0:d,0:d]
-            R = np.linalg.pinv(tmp) - np.linalg.pinv(Sigma)
+            try:
+                R = scipy.linalg.pinv2(tmp) - scipy.linalg.pinv2(Sigma)
+            except np.linalg.linalg.LinAlgError:
+                continue
             score = self.global_b[0:d].T*R*Sigma*R*self.global_b[0:d]/self.random_samples**2
 #             print(score)
-#             print("[LimeCB] curr_d=%d, test_d=%d, score=%0.3f, thres=%0.2f" % (self.d, d, score, np.sqrt(d)/self.random_samples), flush=True)
-            if score > 0.001*np.sqrt(d)/self.random_samples:
+#            print("[LimeCB] curr_d=%d, test_d=%d, score=%0.3f, thres=%0.2f" % (self.d, d, score, np.sqrt(d)/self.random_samples), flush=True)
+            if score > 0.01*np.sqrt(d)/self.random_samples and self.random_samples > 5*d:
                 ### Then we switch!
                 print("[LimeCB] Switching to d=%d" % (d), flush=True)
                 self.d = d
@@ -172,7 +181,7 @@ if __name__=='__main__':
     parser.add_argument('--s', action='store', default=20, type=int)
     parser.add_argument('--K', action='store', default=5, type=int)
 
-    parser.add_argument('--alg', action='store', default='all', choices=['linucb','bose','minimonster','epsgreedy', 'thompson', 'bag', 'langevin', 'limecb'])
+    parser.add_argument('--alg', action='store', default='all', choices=['linucb','limecb','oracle'])
     parser.add_argument('--param', action='store', default=None)
     parser.add_argument('--noise', action='store', default=None)
     parser.add_argument('--loss', action='store', default=False)
@@ -198,20 +207,20 @@ if __name__=='__main__':
             Alg = Semibandits.LinUCB(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 10})
                 stop = time.time()
         if Args.alg == 'limecb':
             Alg = LimeCB(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 1, 'seed': i, 'base': 'minimonster'})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': 'linucb'})
                 stop = time.time()
-        if Args.alg == 'epsgreedy':
-            learning_alg = lambda: sklearn.linear_model.LinearRegression()
-            Alg = Semibandits.EpsGreedy(S,learning_alg=learning_alg,classification=False)
+        if Args.alg == 'oracle':
+            Alg = LimeCB(S)
+            Alg.override = Args.s
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp)=Alg.play(Args.T, verbose=True, params={'eps':Args.param,'train_all':True,'schedule':'lin'})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': 'linucb'})
                 stop=time.time()
         rewards.append(r)
         regrets.append(reg)

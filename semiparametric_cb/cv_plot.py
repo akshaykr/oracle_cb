@@ -16,7 +16,7 @@ def cv(prefix, Args):
 
     for delta in deltas:
         x = []; y = []; z = [];
-        name = prefix+"doubleml_%0.5f_regrets.out" % (delta)
+        name = prefix+"bose_%0.5f_regrets.out" % (delta)
         f = open(name).readlines()
         for i in range(len(f)):
             x.append([float(a) for a in f[i].split(" ")])
@@ -67,7 +67,7 @@ def cv(prefix, Args):
 
 def cv_plot(prefix, best_bose, best_lin, best_thompson, best_mini, best_eps, ax, Args, kind='regrets',ylabel=True):
     x = []; y = []; z = []; m = []; e = []
-    f = open(prefix+"doubleml_%0.5f_%s.out" % (best_bose, kind)).readlines()
+    f = open(prefix+"bose_%0.5f_%s.out" % (best_bose, kind)).readlines()
     for i in range(len(f)):
         x.append([float(a) for a in f[i].split(" ")])
     f = open(prefix+"linucb_%0.5f_%s.out" % (best_lin,kind)).readlines()
