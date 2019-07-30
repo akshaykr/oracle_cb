@@ -44,7 +44,7 @@ class LimeCB(Semibandits.Semibandit):
     def init_minimonster(self):
         learning_alg = lambda: sklearn.linear_model.LinearRegression()
         self.base_learner = Semibandits.MiniMonster(self.passthrough,learning_alg=learning_alg,classification=False)
-        self.base_learner.init(self.T,params={'mu':self.mu,'schedule':'lin'})
+        self.base_learner.init(self.T,params={'mu':self.mu})
         self.base_learner.verbose = False
 
     def init(self, T, params={}):
@@ -149,7 +149,7 @@ class LimeCB(Semibandits.Semibandit):
         to_move = None
         done = False
         for d in self.dimensions:
-            if d <= self.d or done:
+            if d <= self.d or d >= 16*self.d or done:
                 continue
             ### Construct R matrix
             tmp = np.matrix(np.zeros((d,d)))
@@ -182,6 +182,7 @@ if __name__=='__main__':
     parser.add_argument('--K', action='store', default=5, type=int)
 
     parser.add_argument('--alg', action='store', default='all', choices=['linucb','limecb','oracle'])
+    parser.add_argument('--base', action='store', default='minimonster', choices=['minimonster', 'linucb'])
     parser.add_argument('--param', action='store', default=None)
     parser.add_argument('--noise', action='store', default=None)
     parser.add_argument('--loss', action='store', default=False)
@@ -213,18 +214,18 @@ if __name__=='__main__':
             Alg = LimeCB(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': 'linucb'})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': Args.base})
                 stop = time.time()
         if Args.alg == 'oracle':
             Alg = LimeCB(S)
             Alg.override = Args.s
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': 'linucb'})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': Args.base})
                 stop=time.time()
         rewards.append(r)
         regrets.append(reg)
 
-    np.savetxt(outdir+"%s_%0.5f_rewards.out" % (Args.alg, Args.param), rewards)
-    np.savetxt(outdir+"%s_%0.5f_regrets.out" % (Args.alg, Args.param), regrets)
+    np.savetxt(outdir+"%s_%s_%0.5f_rewards.out" % (Args.alg, Args.base, Args.param), rewards)
+    np.savetxt(outdir+"%s_%s_%0.5f_regrets.out" % (Args.alg, Args.base, Args.param), regrets)
     print("---- DONE ----")

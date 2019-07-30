@@ -358,9 +358,10 @@ class LinearBandit(SemibanditSim):
             self.features = np.matrix(np.random.dirichlet(1.0/self.d*np.ones(self.d), self.K))
         else:
             self.features = np.matrix(np.random.normal(0, 1, [self.K, self.d]))
+            self.features[0,:] = 0.05*self.features[0,:] + np.matrix(self.weights.T)
 
         self.features = np.diag(1./np.sqrt(np.diag(self.features*self.features.T)))*self.features
-        self.all_features.append(self.features)
+        # self.all_features.append(self.features)
 
         self.curr_means = np.array((self.features*self.weights).T)[0]
         if self.quad:
