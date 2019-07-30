@@ -117,7 +117,7 @@ def cv_plot(prefix, best_lime_m, best_lime_l, best_lin, best_oracle_m, best_orac
     if ylabel:
         plt.ylabel('Regret', fontsize=16)
     legendHandles = []
-    legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="LimeCB"), "LimeCB"))
+    legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="LinCB.MS"), "LinCB.MS"))
     legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="LinUCB"), "LinUCB"))
     legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="Oracle"), "Oracle"))
 #     legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="LimeCB_L"), "LimeCB_L"))
@@ -156,7 +156,7 @@ if __name__=='__main__':
     prefix = '../results/T=%d_d=%d_s=%d_K=%d_sig=1.0/' % (Args.T, Args.d, Args.s, Args.K)
     (best_lime_m, best_lime_l, best_lin, best_oracle_m, best_oracle_l) = cv(prefix, Args)
     (legendHandles) = cv_plot(prefix, best_lime_m, best_lime_l, best_lin, best_oracle_m, best_oracle_l, ax1, Args,kind=Args.kind)
-    plt.title('d=%d, s=%d, K=%d' % (Args.d, Args.s, Args.K), fontsize=16)
+    plt.title('d=%d, $d_{m*}$=%d, K=%d' % (Args.d, Args.s, Args.K), fontsize=16)
 
     leg = ax1.legend([x[1] for x in legendHandles], loc='upper left', shadow=False, frameon=True, fontsize=16)
     for legobj in leg.legendHandles:
