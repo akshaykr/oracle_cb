@@ -82,7 +82,7 @@ class LimeCB(Semibandits.Semibandit):
         if 'mu' in params.keys():
             self.mu = params['mu']
         else:
-            self.mu = 1
+            self.mu = 0
             
         self.passthrough = LimeCB.PassthroughSimulator(self.B, self.d)
         self.init_learner = None
@@ -216,12 +216,20 @@ if __name__=='__main__':
                 start = time.time()
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': Args.base})
                 stop = time.time()
-        if Args.alg == 'oracle':
+        if Args.alg == 'oracle' and Args.base == 'minimonster':
             Alg = LimeCB(S)
             Alg.override = Args.s
             if Args.param is not None:
                 start = time.time()
                 (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'mu': Args.param, 'schedule': 10, 'seed': i, 'base': Args.base})
+                stop=time.time()
+        if Args.alg == 'oracle' and Args.base == 'linucb':
+            print("here")
+            Alg = LimeCB(S)
+            Alg.override = Args.s
+            if Args.param is not None:
+                start = time.time()
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'schedule': 10, 'seed': i, 'base': Args.base})
                 stop=time.time()
         rewards.append(r)
         regrets.append(reg)

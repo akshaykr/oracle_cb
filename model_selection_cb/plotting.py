@@ -117,14 +117,14 @@ def cv_plot(prefix, best_lime_m, best_lime_l, best_lin, best_oracle_m, best_orac
     if ylabel:
         plt.ylabel('Regret', fontsize=16)
     legendHandles = []
-    legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="LinCB.MS"), "LinCB.MS"))
+    legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="ModCB"), "ModCB"))
     legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="LinUCB"), "LinUCB"))
     legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="Oracle"), "Oracle"))
 #     legendHandles.append((matplotlib.patches.Patch(color=l1[0].get_color(), label="LimeCB_L"), "LimeCB_L"))
 #     legendHandles.append((matplotlib.patches.Patch(color=l2[0].get_color(), label="Oracle_L"), "Oracle_L"))
     # plt.legend(['Ours', 'LinUCB', 'ILTCB', 'EpsGreedy'])
 
-    print ("LimeCB_M %0.2f, LinUCB %0.2f, Oracle_M %0.2f" % (np.mean(x,axis=0)[-1], np.mean(y,axis=0)[-1], np.mean(z,axis=0)[-1]))
+    print ("ModCB_M %0.2f, LinUCB %0.2f, Oracle_M %0.2f" % (np.mean(x,axis=0)[-1], np.mean(y,axis=0)[-1], np.mean(z,axis=0)[-1]))
     return(legendHandles)
 
 if __name__=='__main__':
