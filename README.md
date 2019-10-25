@@ -27,6 +27,7 @@ Experimentation for oracle based contextual bandit algorithms.
 ## Locally running an algorithm
 
 1. Use Semibandits.py. 
+
    For contextual semibandits experiments (experiments for
    https://arxiv.org/abs/1502.05890), the entrypoint is
    Semibandits.py. This script can be executed with a few parameters.
