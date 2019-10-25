@@ -27,7 +27,9 @@ Experimentation for oracle based contextual bandit algorithms.
 ## Locally running an algorithm
 
 1. Use Semibandits.py. 
-   It can be run as a script with a few parameters.
+   For contextual semibandits experiments (experiments for
+   https://arxiv.org/abs/1502.05890), the entrypoint is
+   Semibandits.py. This script can be executed with a few parameters.
 
    ```
    $ python3 Semibandits.py --T 1000 --dataset mslr30k --L 3 --I 0 --alg lin --param 0.1
@@ -39,6 +41,45 @@ Experimentation for oracle based contextual bandit algorithms.
    out dataset (which we currently ignore), and the total running time
    of the execution.
 
+   Please see ./semibandits/make_parallel_script.py for configurations
+   used in the experiments for the paper.
+
+2. Use Bose.py
+
+   For semiparametric contextual bandit experiments (experiments for
+   https://arxiv.org/abs/1803.04204), the entrypoint is Bose.py. This
+   script can be executed with a similar configuration
+
+   ```
+   $ python3 Bose.py --T 1000 --dataset semiparametric --d 10 --K 2 --iters 10 --param 0.1 --alg bose --feat pos --noise 0.5
+   ```
+
+   This will create a folder in ./results/ and write two files to the
+   folder. One will contain the total reward reported every 10 rounds
+   and the other will contain the total regret again reported every 10
+   rounds.
+
+   Please see ./semiparametric_cb/make_parallel_script.py for
+   configurations used in the experiments for the paper.
+
+3. Use LimeCB.py
+
+   For CB model selection experiments (experiments for
+   https://arxiv.org/abs/1906.00531), the entrypoint is
+   LimeCB.py. This script can be executed with a few parameters as
+   well
+
+   ```
+   $ python3 LimeCB.py --T 4000 --d 1000 --s 10 --K 2 --iters 10 --param 0.1 --alg limecb --noise 1.0 --base minimonster
+   ```
+
+   This will create a folder in ./results/ and write two files to the
+   folder. One will contain the total reward reported every 10 rounds
+   and the other will contain the total regret again reported every 10
+   rounds.
+
+   Please see ./model_selection_cb/make_scripts.py for configurations
+   used in the experiments for the paper.
 
 ******************************
 ## Running on a cluster
