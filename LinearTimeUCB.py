@@ -24,14 +24,13 @@ class LinUCB(Semibandit):
         """
         self.T = T
         self.d = self.B.d
-        self.weights = np.matrix(np.random.normal(0,1,(self.d,1)))
-        self.aux_weights = np.matrix(np.random.normal(0,1,(self.d,1)))
         self.b_vec = np.matrix(np.zeros((self.d,1)))
-        self.aux_vec = np.matrix(np.zeros((self.d,1)))
+        self.aux_vec = np.matrix(np.random.normal(0,10,(self.d,1)))
         self.cov = np.matrix(np.eye(self.d))
         self.Cinv = scipy.linalg.inv(self.cov)
         self.weights = self.Cinv*self.b_vec
-        self.aux_weights = self.Cinv*self.b_vec
+        self.aux_weights = self.Cinv*self.aux_vec
+        
         self.t = 1
 
         if "delta" in params.keys():
@@ -99,6 +98,7 @@ class LinUCB(Semibandit):
         ucbs = [features[k,:]*self.weights + alpha*np.abs(features[k,:]*self.aux_weights) for k in range(K)]
         # ucbs = [features[k,:]*self.weights + alpha*np.sqrt(features[k,:]*self.Cinv*features[k,:].T) for k in range(K)]
 
+        ## TODO: implement at tie breaking scheme?
         ucbs = [a[0,0] for a in ucbs]
         ranks = np.argsort(ucbs)
         return ranks[K-self.B.L:K]
@@ -136,7 +136,7 @@ if __name__=='__main__':
     regrets = []
     times = []
     for i in range(Args.iters):
-        S = Simulators.LinearBandit(Args.d, 1, Args.K, noise=Args.noise, seed=i, pos=True)
+        S = Simulators.MultiArmBandit(Args.d, 1, noise=Args.noise, seed=i)
         if Args.alg == 'linucb':
             Alg = Semibandits.LinUCB(S)
             if Args.param is not None:

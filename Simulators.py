@@ -486,7 +486,61 @@ class SemiparametricBandit(SemibanditSim):
     def get_slate_reward(self, A):
         return self.curr_r[A]
 
+class MultiArmBandit(SemibanditSim):
+    
+    def __init__(self, d, L, noise=False, seed=None):
+        self.d = d
+        self.L = L
+        self.K = d
+        self.N = None
+        self.X = None
+        self.noise = noise
+        self.seed = seed
 
+        if seed is not None:
+            np.random.seed(574)
+
+        self.weights = np.matrix(np.random.dirichlet(d*np.ones(self.d))).T
+        self.weights = self.weights/np.linalg.norm(self.weights)
+        print(self.weights)
+
+        if seed is not None:
+            np.random.seed(seed)
+
+        self.t = 0
+        self.curr_x = None
+        self.features = None
+        self.curr_r = None
+        self.curr_x = None
+
+    def get_new_context(self):
+        if self.seed is not None:
+            np.random.seed((self.t+17)*(self.seed+1) + 37)
+
+        self.features = np.matrix(np.eye(self.d))
+        self.curr_means = np.array((self.features*self.weights).T)[0]
+
+        if self.noise and type(self.noise) == float:
+            self.noise_term = np.random.normal(0,self.noise)
+            self.curr_r = np.array(self.curr_means+self.noise_term)
+        elif self.noise:
+            self.noise_term = np.random.normal(0, 0.1)
+            self.curr_r = np.array(self.curr_means+self.noise_term)
+        else:
+            self.curr_r = np.array(self.curr_means)
+
+        old_t = self.t
+        self.t += 1
+        self.curr_x = LinearBandit.LinearContext(self.t, self.features)
+        return self.curr_x
+
+    def get_best_reward(self):
+        idx = np.argsort(self.curr_means)
+        return np.sum(self.curr_r[idx[len(idx)-self.L:len(idx)]])
+
+    def get_slate_reward(self, A):
+        return self.curr_r[A]
+        
 class MSLRBandit(SemibanditSim):
     """
     Currently deprecated

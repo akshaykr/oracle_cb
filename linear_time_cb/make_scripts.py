@@ -1,9 +1,9 @@
 import numpy as np
 
 if __name__=='__main__':
-    T = 10000
+    T = 5000
     d = 10
-    K = 4
+    K = 10
 
     delta_vals = np.logspace(-3,1,5)
     lr_vals = [0.1]
@@ -11,7 +11,7 @@ if __name__=='__main__':
 #     lr_vals = np.logspace(-4,0,5)
 #     lr2_vals = np.logspace(-4,0,5)
 
-    iters = 20
+    iters = 10
 
     print("cd ../")
     for i in range(len(delta_vals)):
