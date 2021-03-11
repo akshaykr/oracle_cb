@@ -24,12 +24,6 @@ class LinUCB(Semibandit):
         """
         self.T = T
         self.d = self.B.d
-        self.b_vec = np.matrix(np.zeros((self.d,1)))
-        self.aux_vec = np.matrix(np.random.normal(0,10,(self.d,1)))
-        self.cov = np.matrix(np.eye(self.d))
-        self.Cinv = scipy.linalg.inv(self.cov)
-        self.weights = self.Cinv*self.b_vec
-        self.aux_weights = self.Cinv*self.aux_vec
         
         self.t = 1
 
@@ -52,7 +46,23 @@ class LinUCB(Semibandit):
         self.reward = []
         self.opt_reward = []
 
+        self.use_ols=False
+        if self.lr == 0:
+            self.use_ols=True
+
+        self.b_vec = np.matrix(np.zeros((self.d,1)))
+        self.aux_vec = np.matrix(np.random.normal(0,10,(self.d,1)))
+        self.cov = np.matrix(np.eye(self.d))
+        self.Cinv = scipy.linalg.inv(self.cov)
+        self.weights = self.Cinv*self.b_vec
+        self.aux_weights = self.Cinv*self.aux_vec
+        self.iterate = self.weights
+        self.aux_iterate = self.aux_weights
+
+
+        self.greedy = False
         if self.lr2 == 0:
+            self.greedy = True
             self.aux_weights = np.matrix(np.zeros((self.d,1)))
 
     def update(self, x, A, y_vec, r):
@@ -62,16 +72,21 @@ class LinUCB(Semibandit):
         features = np.matrix(x.get_ld_features())
         for i in range(len(A)):
             rand_noise = np.random.normal(0,1)
-#             self.weights -= self.lr/np.sqrt(self.t)*features[A[i],:].T*(features[A[i],:]*self.weights - y_vec[i])
-#             self.aux_weights -= self.lr2/np.sqrt(self.t)*features[A[i],:].T*(features[A[i],:]*self.aux_weights - rand_noise)
-        
-            self.cov += features[A[i],:].T*features[A[i],:]
-            self.b_vec += y_vec[i]*features[A[i],:].T
-            self.aux_vec += rand_noise*features[A[i],:].T
-        self.Cinv = scipy.linalg.inv(self.cov)
-        self.weights = self.Cinv*self.b_vec
-        if self.lr2 != 0:
-            self.aux_weights = self.Cinv*self.aux_vec
+            if self.use_ols:
+                self.cov += features[A[i],:].T*features[A[i],:]
+                self.b_vec += y_vec[i]*features[A[i],:].T
+                self.aux_vec += rand_noise*features[A[i],:].T
+                self.Cinv = scipy.linalg.inv(self.cov)
+                self.weights = self.Cinv*self.b_vec
+                if self.lr2 != 0:
+                    self.aux_weights = self.Cinv*self.aux_vec
+            else:
+                ### SGD step on the "iterates"
+                self.iterate -= self.lr/np.sqrt(self.t)*features[A[i],:].T*(features[A[i],:]*self.iterate - y_vec[i])
+                self.aux_iterate -= self.lr2/np.sqrt(self.t)*features[A[i],:].T*(features[A[i],:]*self.aux_iterate - rand_noise)
+                ### Iterate averaging to get the "weights"
+                self.weights = self.t/(self.t+1)*self.weights + 1/(self.t+1)*self.iterate
+                self.aux_weights = self.t/(self.t+1)*self.aux_weights + 1/(self.t+1)*self.aux_iterate
         self.t += 1
 #         import pdb
 #         pdb.set_trace()
@@ -153,8 +168,17 @@ if __name__=='__main__':
         rewards.append(r)
         regrets.append(reg)
 
-    if Args.lr2 == 0:
-        Args.alg = 'greedy'
+    if Args.alg == 'linucb':
+        pass
+    elif Args.lr2 == 0 and Args.lr == 0:
+        Args.alg = "greedy-ols"
+    elif Args.lr2 == 0:
+        Args.alg = "greedy-sgd"
+    elif Args.lr == 0:
+        Args.alg = "rnd-ols"
+    else:
+        Args.alg = "rnd-sgd"
+        
     np.savetxt(outdir+"%s_%0.5f_%0.5f_%0.5f_rewards.out" % (Args.alg, Args.param, Args.lr, Args.lr2), rewards)
     np.savetxt(outdir+"%s_%0.5f_%0.5f_%0.5f_regrets.out" % (Args.alg, Args.param, Args.lr, Args.lr2), regrets)
     np.savetxt(outdir+"%s_%0.5f_%0.5f_%0.5f_times.out" % (Args.alg, Args.param, Args.lr, Args.lr2), times)
