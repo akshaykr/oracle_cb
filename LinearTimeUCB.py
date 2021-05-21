@@ -43,6 +43,10 @@ class LinUCB(Semibandit):
             self.schedule = params['schedule']
         else:
             self.schedule = 100
+        self.M=10
+        if "M" in params.keys():
+            self.M = int(params['M'])
+
         self.reward = []
         self.opt_reward = []
 
@@ -51,7 +55,7 @@ class LinUCB(Semibandit):
             self.use_ols=True
 
         self.b_vec = np.matrix(np.zeros((self.d,1)))
-        self.aux_vec = np.matrix(np.random.normal(0,10,(self.d,1)))
+        self.aux_vec = np.matrix(np.random.normal(0,10,(self.d,self.M)))
         self.cov = np.matrix(np.eye(self.d))
         self.Cinv = scipy.linalg.inv(self.cov)
         self.weights = self.Cinv*self.b_vec
@@ -63,7 +67,7 @@ class LinUCB(Semibandit):
         self.greedy = False
         if self.lr2 == 0:
             self.greedy = True
-            self.aux_weights = np.matrix(np.zeros((self.d,1)))
+            self.aux_weights = np.matrix(np.zeros((self.d,self.M)))
 
     def update(self, x, A, y_vec, r):
         """
@@ -71,11 +75,11 @@ class LinUCB(Semibandit):
         """
         features = np.matrix(x.get_ld_features())
         for i in range(len(A)):
-            rand_noise = np.random.normal(0,1)
+            rand_noise = np.matrix(np.random.normal(0,1,size=(1,self.M)))
             if self.use_ols:
                 self.cov += features[A[i],:].T*features[A[i],:]
                 self.b_vec += y_vec[i]*features[A[i],:].T
-                self.aux_vec += rand_noise*features[A[i],:].T
+                self.aux_vec += features[A[i],:].T*rand_noise
                 self.Cinv = scipy.linalg.inv(self.cov)
                 self.weights = self.Cinv*self.b_vec
                 if self.lr2 != 0:
@@ -83,10 +87,13 @@ class LinUCB(Semibandit):
             else:
                 ### SGD step on the "iterates"
                 self.iterate -= self.lr/np.sqrt(self.t)*features[A[i],:].T*(features[A[i],:]*self.iterate - y_vec[i])
+#                 print(features[A[i],:]*self.aux_iterate)
+#                 print(rand_noise)
                 self.aux_iterate -= self.lr2/np.sqrt(self.t)*features[A[i],:].T*(features[A[i],:]*self.aux_iterate - rand_noise)
                 ### Iterate averaging to get the "weights"
                 self.weights = self.t/(self.t+1)*self.weights + 1/(self.t+1)*self.iterate
                 self.aux_weights = self.t/(self.t+1)*self.aux_weights + 1/(self.t+1)*self.aux_iterate
+#                print(self.aux_weights)
         self.t += 1
 #         import pdb
 #         pdb.set_trace()
@@ -110,7 +117,7 @@ class LinUCB(Semibandit):
 #         import pdb
 #         pdb.set_trace()
         alpha = np.sqrt(self.d)*self.delta ## *np.log((1+self.t*K)/self.delta)) + 1
-        ucbs = [features[k,:]*self.weights + alpha*np.abs(features[k,:]*self.aux_weights) for k in range(K)]
+        ucbs = [features[k,:]*self.weights + np.max(alpha*np.abs(features[k,:]*self.aux_weights)) for k in range(K)]
         # ucbs = [features[k,:]*self.weights + alpha*np.sqrt(features[k,:]*self.Cinv*features[k,:].T) for k in range(K)]
 
         ## TODO: implement at tie breaking scheme?
@@ -133,7 +140,7 @@ if __name__=='__main__':
     parser.add_argument('--lr', action='store', type=float, default=0.1)
     parser.add_argument('--lr2', action='store', type=float, default=0.1) 
     parser.add_argument('--noise', action='store', default=None)
-
+    parser.add_argument('--M', action='store', type=int, default=1)
 
     Args = parser.parse_args(sys.argv[1:])
     print(Args,flush=True)
@@ -162,7 +169,7 @@ if __name__=='__main__':
             Alg = LinUCB(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'lr': Args.lr, 'lr2': Args.lr2, 'schedule': 1})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'lr': Args.lr, 'lr2': Args.lr2, 'schedule': 1, 'M': Args.M})
                 stop = time.time()
         times.append(stop-start)
         rewards.append(r)
@@ -179,7 +186,7 @@ if __name__=='__main__':
     else:
         Args.alg = "rnd-sgd"
         
-    np.savetxt(outdir+"%s_%0.5f_%0.5f_%0.5f_rewards.out" % (Args.alg, Args.param, Args.lr, Args.lr2), rewards)
-    np.savetxt(outdir+"%s_%0.5f_%0.5f_%0.5f_regrets.out" % (Args.alg, Args.param, Args.lr, Args.lr2), regrets)
-    np.savetxt(outdir+"%s_%0.5f_%0.5f_%0.5f_times.out" % (Args.alg, Args.param, Args.lr, Args.lr2), times)
+    np.savetxt(outdir+"%s_%d_%0.5f_%0.5f_%0.5f_rewards.out" % (Args.alg, Args.M, Args.param, Args.lr, Args.lr2), rewards)
+    np.savetxt(outdir+"%s_%d_%0.5f_%0.5f_%0.5f_regrets.out" % (Args.alg, Args.M, Args.param, Args.lr, Args.lr2), regrets)
+    np.savetxt(outdir+"%s_%d_%0.5f_%0.5f_%0.5f_times.out" % (Args.alg, Args.M, Args.param, Args.lr, Args.lr2), times)
     print("---- DONE ----")
