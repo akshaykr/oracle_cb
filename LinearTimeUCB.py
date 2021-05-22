@@ -55,7 +55,7 @@ class LinUCB(Semibandit):
             self.use_ols=True
 
         self.b_vec = np.matrix(np.zeros((self.d,1)))
-        self.aux_vec = np.matrix(np.random.normal(0,10,(self.d,self.M)))
+        self.aux_vec = np.matrix(np.random.normal(0,1,(self.d,self.M)))
         self.cov = np.matrix(np.eye(self.d))
         self.Cinv = scipy.linalg.inv(self.cov)
         self.weights = self.Cinv*self.b_vec
@@ -117,7 +117,8 @@ class LinUCB(Semibandit):
 #         import pdb
 #         pdb.set_trace()
         alpha = np.sqrt(self.d)*self.delta ## *np.log((1+self.t*K)/self.delta)) + 1
-        ucbs = [features[k,:]*self.weights + np.max(alpha*np.abs(features[k,:]*self.aux_weights)) for k in range(K)]
+#         ucbs = [features[k,:]*self.weights + np.max(alpha*np.abs(features[k,:]*self.aux_weights)) for k in range(K)]
+        ucbs = [features[k,:]*self.weights + np.max(alpha*features[k,:]*self.aux_weights) for k in range(K)]
         # ucbs = [features[k,:]*self.weights + alpha*np.sqrt(features[k,:]*self.Cinv*features[k,:].T) for k in range(K)]
 
         ## TODO: implement at tie breaking scheme?
@@ -141,15 +142,16 @@ if __name__=='__main__':
     parser.add_argument('--lr2', action='store', type=float, default=0.1) 
     parser.add_argument('--noise', action='store', default=None)
     parser.add_argument('--M', action='store', type=int, default=1)
+    parser.add_argument('--outdir_pref', action='store', type=str, default='./')
 
     Args = parser.parse_args(sys.argv[1:])
     print(Args,flush=True)
     if Args.noise is not None:
         Args.noise = float(Args.noise)
 
-    outdir = './results/T=%d_d=%d_K=%d_sig=%0.1f/' % (Args.T, Args.d, Args.K, Args.noise)
+    outdir = '%srnd_results/T=%d_d=%d_K=%d/' % (Args.outdir_pref,Args.T, Args.d, Args.K)
     if not os.path.isdir(outdir):
-        os.mkdir(outdir)
+        os.makedirs(outdir)
 
     if Args.param is not None:
         Args.param = float(Args.param)

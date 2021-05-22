@@ -500,8 +500,11 @@ class MultiArmBandit(SemibanditSim):
         if seed is not None:
             np.random.seed(574)
 
-        self.weights = np.matrix(np.random.dirichlet(d*np.ones(self.d))).T
-        self.weights = self.weights/np.linalg.norm(self.weights)
+        self.weights = np.matrix(0.25*np.ones(self.d)).T
+        idx = np.random.choice(d)
+        self.weights[idx] += 0.5
+#         self.weights = np.matrix(np.random.dirichlet(self.d*np.ones(self.d))).T
+#         self.weights = self.weights/np.linalg.norm(self.weights)
 
         if seed is not None:
             np.random.seed(seed)
