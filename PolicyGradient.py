@@ -20,6 +20,7 @@ class PolicyGradient(Semibandit):
 
     def __init__(self,B):
         self.B = B
+        self.name='pg'
 
 
     def init(self, T, params={}):
@@ -41,8 +42,8 @@ class PolicyGradient(Semibandit):
         else:
             self.delta = 1.0
 
-        if "epsilon" in params.keys():
-            self.eps = params['epsilon']
+        if "eps" in params.keys():
+            self.eps = params['eps']
         else:
             self.eps = 0
 
@@ -93,6 +94,7 @@ class OnlineEpsGreedy(Semibandit):
 
     def __init__(self,B):
         self.B = B
+        self.name='eps'
     
     def init(self, T, params={}):
         """
@@ -109,14 +111,9 @@ class OnlineEpsGreedy(Semibandit):
         self.t = 1
 
         if "delta" in params.keys():
-            self.delta = params['delta']
+            self.eps = params['delta']
         else:
-            self.delta = 1.0
-
-        if "epsilon" in params.keys():
-            self.eps = params['epsilon']
-        else:
-            self.eps = 0
+            self.eps = 0.0
 
         if "lr" in params.keys():
             self.lr = params['lr']
@@ -209,7 +206,7 @@ if __name__=='__main__':
             Alg = OnlineEpsGreedy(S)
             if Args.param is not None:
                 start = time.time()
-                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'eps': Args.eps, 'lr': Args.lr})
+                (r,reg,val_tmp) = Alg.play(Args.T, verbose=True, params={'delta': Args.param, 'lr': Args.lr})
                 stop = time.time()
         times.append(stop-start)
         rewards.append(r)
