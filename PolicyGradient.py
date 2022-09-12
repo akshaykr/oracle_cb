@@ -101,10 +101,11 @@ class OnlineEpsGreedy(Semibandit):
         Initialize the policy parameters.
         Three parameters here:
         1. epsilon: parameter for uniform exploration, default = 0
-        2. delta: softmax parameter, default =1 
-        3. lr: learning rate
+        2. lr: learning rate
         """
         
+        self.mtr = True
+
         self.T = T
         self.d = self.B.d
 
@@ -147,11 +148,15 @@ class OnlineEpsGreedy(Semibandit):
         features = np.matrix(x.get_ld_features())
         outputs = self.model(torch.Tensor(features))
         outputs = outputs.T[0,:]
-        iw_rew = np.zeros((x.get_K(),))
-        iw_rew[A] = y_vec/self.imp_weight
-        # print(outputs)
-        # print(iw_rew)
-        loss = mse_loss(torch.Tensor(iw_rew), outputs)
+        loss = 0
+        if self.mtr:
+            y = torch.Tensor(y_vec)
+            for i in range(len(A)):
+                loss += self.imp_weight[i]*mse_loss(outputs[A[i]], y[i])
+        else:
+            iw_rew = np.zeros((x.get_K(),))
+            iw_rew[A] = y_vec/self.imp_weight
+            loss = mse_loss(torch.Tensor(iw_rew), outputs)
         loss.backward()
         self.optim.step()
 
